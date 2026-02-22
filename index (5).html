@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>StangPrangTime 🔥</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #111;
+    --bg3: #1a1a1a;
+    --silver: #c8c8c8;
+    --silver-dim: #888;
+    --red: #cc1111;
+    --red-bright: #ff2222;
+    --red-glow: #ff000055;
+    --gold: #c8a84b;
+    --white: #f0f0f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: var(--bg);
+    color: var(--silver);
+    font-family: 'Oswald', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    padding-bottom: 20px;
+  }
+
+  /* Header */
+  #header {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    padding: 18px 16px 0;
+  }
+
+  #title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 10vw, 5rem);
+    color: var(--white);
+    letter-spacing: 4px;
+    line-height: 1;
+    text-shadow: 0 0 30px var(--red-glow), 0 2px 0 #000;
+  }
+
+  #subtitle {
+    font-size: 0.75rem;
+    color: var(--red-bright);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  /* Stats bar */
+  #stats-bar {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    flex: 1;
+    min-width: 80px;
+    background: var(--bg3);
+    border: 1px solid #2a2a2a;
+    border-top: 2px solid var(--red);
+    padding: 6px 10px;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    color: var(--silver-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--white);
+    line-height: 1.1;
+  }
+
+  .stat-value.tow { color: var(--gold); }
+
+  /* Car selection */
+  #car-select {
+    width: 100%;
+    max-width: 600px;
+    padding: 0 16px;
+  }
+
+  #car-select h2 {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: var(--silver-dim);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  #car-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .car-btn {
+    flex: 1;
+    background: var(--bg3);
+    border: 2px solid #333;
+    color: var(--silver);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+  }
+
+  .car-btn:hover { border-color: var(--red); color: var(--white); }
+
+  .car-btn.selected {
+    border-color: var(--red-bright);
+    background: #1f0a0a;
+    color: var(--white);
+    box-shadow: 0 0 20px var(--red-glow);
+  }
+
+  .car-btn .car-emoji { font-size: 2rem; }
+  .car-btn .car-name { font-size: 0.85rem; }
+  .car-btn .car-spec { font-size: 0.6rem; color: var(--silver-dim); font-weight: 300; letter-spacing: 1px; }
+  .car-btn.selected .car-spec { color: var(--red-bright); }
+
+  /* Canvas area */
+  #canvas-wrap {
+    width: 100%;
+    max-width: 600px;
+    padding: 14px 16px 0;
+    position: relative;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    border: 2px solid #222;
+    border-top: 3px solid var(--red);
+    display: block;
+    background: #0a0a0a;
+    cursor: crosshair;
+  }
+
+  /* Speed meter */
+  #speedometer {
+    position: absolute;
+    top: 26px;
+    right: 28px;
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    pointer-events: none;
+  }
+  #speed-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--white);
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+  #speed-unit { font-size: 0.6rem; color: var(--silver-dim); letter-spacing: 2px; }
+
+  /* Survival timer */
+  #survival-display {
+    position: absolute;
+    top: 26px;
+    left: 28px;
+    font-family: 'Share Tech Mono', monospace;
+    pointer-events: none;
+  }
+  #survival-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--red-bright);
+    line-height: 1;
+    text-shadow: 0 0 10px var(--red-glow);
+  }
+  #survival-unit { font-size: 0.6rem; color: var(--silver-dim); letter-spacing: 2px; }
+
+  /* Launch button */
+  #launch-wrap {
+    width: 100%;
+    max-width: 600px;
+    padding: 14px 16px 0;
+  }
+
+  #launchBtn {
+    width: 100%;
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 7vw, 3rem);
+    letter-spacing: 6px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #launchBtn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  }
+
+  #launchBtn:hover {
+    background: var(--red-bright);
+    box-shadow: 0 0 40px var(--red-glow);
+    transform: translateY(-1px);
+  }
+
+  #launchBtn:active { transform: translateY(1px); box-shadow: none; }
+  #launchBtn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Controls */
+  #controls {
+    width: 100%;
+    max-width: 600px;
+    padding: 12px 16px 0;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #controls.active { display: flex; }
+
+  .ctrl-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .ctrl-btn {
+    flex: 1;
+    max-width: 140px;
+    min-height: 64px;
+    background: var(--bg3);
+    border: 2px solid #333;
+    color: var(--silver);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.1s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    position: relative;
+  }
+
+  .ctrl-btn:active, .ctrl-btn.pressed {
+    background: #2a0a0a;
+    border-color: var(--red-bright);
+    color: var(--white);
+    box-shadow: 0 0 15px var(--red-glow);
+  }
+
+  .ctrl-btn.gas { border-color: #1a4a1a; color: #4aff4a; }
+  .ctrl-btn.gas:active, .ctrl-btn.gas.pressed { background: #0a2a0a; border-color: #4aff4a; box-shadow: 0 0 15px #00ff0044; }
+
+  .ctrl-btn.brake { border-color: #4a1a1a; color: var(--red-bright); }
+  .ctrl-btn.brake:active, .ctrl-btn.brake.pressed { background: #2a0a0a; border-color: var(--red-bright); }
+
+  /* Prang overlay */
+  #prang-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    text-align: center;
+    padding: 30px;
+  }
+
+  #prang-overlay.show { display: flex; }
+
+  #prang-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 6rem);
+    color: var(--red-bright);
+    letter-spacing: 4px;
+    text-shadow: 0 0 60px var(--red-glow);
+    animation: prangPulse 0.4s ease infinite alternate;
+  }
+
+  @keyframes prangPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.04); }
+  }
+
+  #prang-msg {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    color: var(--silver);
+    margin: 16px 0;
+    max-width: 440px;
+    line-height: 1.5;
+  }
+
+  #prang-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin: 10px 0;
+  }
+
+  #prang-tow {
+    font-size: 0.9rem;
+    color: var(--silver-dim);
+    margin-bottom: 24px;
+  }
+
+  #retryBtn {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    padding: 14px 50px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  #retryBtn:hover { background: var(--red-bright); box-shadow: 0 0 30px var(--red-glow); }
+
+  /* Footer */
+  #footer {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    padding: 14px 16px 0;
+    font-size: 0.65rem;
+    color: #444;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="title">STANG PRANG TIME</div>
+  <div id="subtitle">🔥 The Inevitable Mustang Drift Simulator 🔥</div>
+</div>
+
+<div id="stats-bar">
+  <div class="stat">
+    <div class="stat-label">POWER</div>
+    <div class="stat-value" id="statPower">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">GRIP</div>
+    <div class="stat-value" id="statGrip">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">TYRES</div>
+    <div class="stat-value" id="statTyres">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">TOW BUCKS</div>
+    <div class="stat-value tow" id="statTow">$0</div>
+  </div>
+</div>
+
+<div id="car-select">
+  <h2>— SELECT YOUR WEAPON —</h2>
+  <div id="car-buttons">
+    <button class="car-btn" id="btn-gt500" onclick="selectCar('gt500')">
+      <span class="car-emoji">🤍</span>
+      <span class="car-name">WHITE GT500</span>
+      <span class="car-spec">950HP / ZERO GRIP</span>
+    </button>
+    <button class="car-btn" id="btn-foxbody" onclick="selectCar('foxbody')">
+      <span class="car-emoji">❤️</span>
+      <span class="car-name">RED FOXBODY</span>
+      <span class="car-spec">5.0 / BALD TYRES</span>
+    </button>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <canvas id="gameCanvas" width="568" height="280"></canvas>
+  <div id="speedometer">
+    <div id="speed-num">0</div>
+    <div id="speed-unit">KM/H</div>
+  </div>
+  <div id="survival-display">
+    <div id="survival-num">0.0</div>
+    <div id="survival-unit">SECONDS</div>
+  </div>
+</div>
+
+<div id="launch-wrap">
+  <button id="launchBtn" onclick="launchGame()" disabled>🔥 LAUNCH 🔥</button>
+</div>
+
+<div id="controls">
+  <div class="ctrl-row">
+    <button class="ctrl-btn" id="btnLeft" data-key="left">◀ LEFT</button>
+    <button class="ctrl-btn gas" id="btnGas" data-key="gas">⬆ GAS</button>
+    <button class="ctrl-btn" id="btnRight" data-key="right">RIGHT ▶</button>
+  </div>
+  <div class="ctrl-row">
+    <button class="ctrl-btn brake" id="btnBrake" data-key="brake">⬇ BRAKE</button>
+  </div>
+</div>
+
+<div id="prang-overlay">
+  <div id="prang-title">PRANGED!</div>
+  <div id="prang-msg" id="prang-msg"></div>
+  <div id="prang-score"></div>
+  <div id="prang-tow"></div>
+  <button id="retryBtn" onclick="resetGame()">TRY AGAIN (YOU WON'T)</button>
+</div>
+
+<div id="footer">
+  STANGPRANGTIME v1.0 — NOT RESPONSIBLE FOR ACTUAL VEHICLE DAMAGE — USE TURNING SIGNAL WHEN PRANGING
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const CARS = {
+  gt500: {
+    name: 'White GT500',
+    img: 'WhiteStang.png',
+    power: 950,
+    grip: 12,
+    tyres: 'SLICK',
+    driftRate: 0.018,
+    accel: 0.55,
+    maxSpeed: 340,
+    color: '#f0f0f0'
+  },
+  foxbody: {
+    name: 'Red Foxbody',
+    img: 'Foxbody.png',
+    power: 302,
+    grip: 28,
+    tyres: 'BALD',
+    driftRate: 0.012,
+    accel: 0.38,
+    maxSpeed: 220,
+    color: '#cc1111'
+  }
+};
+
+const PRANG_MSGS = [
+  "Congratulations! You've done it again. Spectators are applauding.",
+  "Into the crowd! Classic. Absolutely classic Mustang behaviour.",
+  "You had ONE job. Straight road. You failed. Hero.",
+  "Tow truck ETA: 8 minutes. Driver said 'not again'.",
+  "The telegraph pole didn't move. You did. Physics: 1, You: 0.",
+  "Local onlookers were NOT shocked. This happens every time.",
+  "Your insurance agent has changed their number. Again.",
+  "You've been banned from car meets in 14 states.",
+  "The car meet crowd scatter was impressively fast.",
+  "Witnesses say it was 'totally avoidable.' They're right.",
+  "Yep. That happened. Get out of the car and think about what you've done.",
+  "Slide right into the armco. As is tradition.",
+  "You lasted longer than last time. Still pranged it though.",
+  "The skid marks say it all. Mostly 'help'.",
+  "Traction control: OFF. Brain: also OFF.",
+  "Another glorious exit. Mustang drivers everywhere are proud.",
+  "Your passengers have filed restraining orders.",
+  "The road is straight. You were not. Classic.",
+];
+
+let selectedCar = null;
+let gameRunning = false;
+let gameStartTime = 0;
+let animFrame = null;
+let towBucks = 0;
+
+// Physics state
+let carX = 0, carY = 0;
+let carVX = 0, carVY = 0;
+let speed = 0;
+let roadOffset = 0;
+let driftAngle = 0;
+let slipTimer = 0;
+let slipActive = false;
+let smokeParticles = [];
+let crashParticles = [];
+let crashed = false;
+let survivalTime = 0;
+
+// Key/touch state
+const keys = { left: false, right: false, gas: false, brake: false };
+
+// Canvas
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const CW = canvas.width;
+const CH = canvas.height;
+
+// Road
+const ROAD_WIDTH = 280;
+const ROAD_CX = CW / 2;
+const LANE_MARKS = 6;
+
+// ─── LOCALSTORAGE ──────────────────────────────────────────────────────────
+function loadTow() {
+  towBucks = parseInt(localStorage.getItem('stangTowBucks') || '0');
+  document.getElementById('statTow').textContent = '$' + towBucks.toLocaleString();
+}
+function saveTow(extra) {
+  towBucks += extra;
+  localStorage.setItem('stangTowBucks', towBucks);
+  document.getElementById('statTow').textContent = '$' + towBucks.toLocaleString();
+}
+loadTow();
+
+// ─── CAR SELECTION ─────────────────────────────────────────────────────────
+function selectCar(id) {
+  selectedCar = id;
+  document.querySelectorAll('.car-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-' + id).classList.add('selected');
+  const c = CARS[id];
+  document.getElementById('statPower').textContent = c.power + 'HP';
+  document.getElementById('statGrip').textContent = c.grip + '%';
+  document.getElementById('statTyres').textContent = c.tyres;
+  document.getElementById('launchBtn').disabled = false;
+  drawIdle();
+}
+
+// ─── DRAW IDLE STATE ───────────────────────────────────────────────────────
+function drawIdle() {
+  ctx.clearRect(0, 0, CW, CH);
+  drawRoad(0);
+  if (selectedCar) {
+    const c = CARS[selectedCar];
+    drawCar(CW / 2, CH * 0.62, 0, c);
+  } else {
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 16px Oswald';
+    ctx.textAlign = 'center';
+    ctx.fillText('SELECT A STANG ABOVE', CW / 2, CH / 2);
+  }
+}
+drawIdle();
+
+// ─── ROAD DRAWING ──────────────────────────────────────────────────────────
+function drawRoad(offset) {
+  const rl = ROAD_CX - ROAD_WIDTH / 2;
+  const rr = ROAD_CX + ROAD_WIDTH / 2;
+
+  // Asphalt
+  ctx.fillStyle = '#1c1c1c';
+  ctx.fillRect(rl, 0, ROAD_WIDTH, CH);
+
+  // Kerbs
+  ctx.fillStyle = '#cc1111';
+  ctx.fillRect(rl - 12, 0, 12, CH);
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(rl - 24, 0, 12, CH);
+  ctx.fillStyle = '#cc1111';
+  ctx.fillRect(rr, 0, 12, CH);
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(rr + 12, 0, 12, CH);
+
+  // Dashes
+  ctx.strokeStyle = '#ffffff22';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([30, 25]);
+  ctx.lineDashOffset = -offset % 55;
+  ctx.beginPath();
+  ctx.moveTo(ROAD_CX - ROAD_WIDTH / 4, 0);
+  ctx.lineTo(ROAD_CX - ROAD_WIDTH / 4, CH);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(ROAD_CX + ROAD_WIDTH / 4, 0);
+  ctx.lineTo(ROAD_CX + ROAD_WIDTH / 4, CH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Grass
+  const grad1 = ctx.createLinearGradient(0, 0, rl, 0);
+  grad1.addColorStop(0, '#0a1a0a');
+  grad1.addColorStop(1, '#0d1a0d');
+  ctx.fillStyle = grad1;
+  ctx.fillRect(0, 0, rl - 24, CH);
+
+  const grad2 = ctx.createLinearGradient(rr + 24, 0, CW, 0);
+  grad2.addColorStop(0, '#0d1a0d');
+  grad2.addColorStop(1, '#0a1a0a');
+  ctx.fillStyle = grad2;
+  ctx.fillRect(rr + 24, 0, CW - rr - 24, CH);
+}
+
+// ─── CAR DRAWING ───────────────────────────────────────────────────────────
+const carImgCache = {};
+function getCarImg(src) {
+  if (!carImgCache[src]) {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => { if (!gameRunning) drawIdle(); };
+    carImgCache[src] = img;
+  }
+  return carImgCache[src];
+}
+
+function drawCar(x, y, angle, carDef) {
+  const img = getCarImg(carDef.img);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.drawImage(img, -28, -18, 56, 36);
+  } else {
+    // Fallback pixel car
+    ctx.fillStyle = carDef.color;
+    ctx.fillRect(-28, -13, 56, 26);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(-20, -9, 15, 12);
+    ctx.fillRect(6, -9, 15, 12);
+    ctx.fillStyle = carDef.color === '#f0f0f0' ? '#ccc' : '#aa0000';
+    ctx.fillRect(-28, 8, 56, 5);
+    // Wheels
+    ctx.fillStyle = '#111';
+    [[-22, -14], [16, -14], [-22, 9], [16, 9]].forEach(([wx, wy]) => {
+      ctx.fillRect(wx, wy, 10, 5);
+    });
+    // Headlights
+    ctx.fillStyle = '#ffff88';
+    ctx.fillRect(20, -10, 6, 5);
+    ctx.fillRect(20, 5, 6, 5);
+  }
+  ctx.restore();
+}
+
+// ─── SMOKE PARTICLES ───────────────────────────────────────────────────────
+function spawnSmoke(x, y, count = 3) {
+  for (let i = 0; i < count; i++) {
+    smokeParticles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 2,
+      vy: -Math.random() * 1.5 - 0.5,
+      life: 1,
+      size: Math.random() * 10 + 6
+    });
+  }
+}
+
+function spawnCrash(x, y) {
+  for (let i = 0; i < 30; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const sp = Math.random() * 5 + 2;
+    crashParticles.push({
+      x, y,
+      vx: Math.cos(angle) * sp,
+      vy: Math.sin(angle) * sp,
+      life: 1,
+      color: Math.random() > 0.5 ? '#ff4400' : (Math.random() > 0.5 ? '#cccccc' : '#ffaa00'),
+      size: Math.random() * 8 + 2
+    });
+  }
+}
+
+function updateParticles() {
+  smokeParticles = smokeParticles.filter(p => p.life > 0);
+  smokeParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.life -= 0.025;
+    p.size += 0.3;
+  });
+  crashParticles = crashParticles.filter(p => p.life > 0);
+  crashParticles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.15;
+    p.life -= 0.02;
+  });
+}
+
+function drawParticles() {
+  smokeParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(180,180,180,${p.life * 0.4})`;
+    ctx.fill();
+  });
+  crashParticles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    const alpha = p.life;
+    ctx.fillStyle = p.color.replace(')', `,${alpha})`).replace('rgb', 'rgba');
+    // parse hex color
+    const hex = p.color;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    ctx.fillStyle = `rgba(${r},${g},${b},${p.life})`;
+    ctx.fill();
+  });
+}
+
+// ─── GAME LAUNCH ───────────────────────────────────────────────────────────
+function launchGame() {
+  if (!selectedCar) return;
+  const c = CARS[selectedCar];
+
+  // Reset state
+  carX = CW / 2;
+  carY = CH * 0.62;
+  carVX = 0;
+  carVY = 0;
+  speed = 0;
+  roadOffset = 0;
+  driftAngle = 0;
+  slipTimer = 0;
+  slipActive = false;
+  smokeParticles = [];
+  crashParticles = [];
+  crashed = false;
+  survivalTime = 0;
+  gameStartTime = performance.now();
+  gameRunning = true;
+
+  document.getElementById('launchBtn').disabled = true;
+  document.getElementById('controls').classList.add('active');
+  document.getElementById('prang-overlay').classList.remove('show');
+
+  cancelAnimationFrame(animFrame);
+  gameLoop();
+}
+
+// ─── GAME LOOP ─────────────────────────────────────────────────────────────
+let lastTime = 0;
+function gameLoop(ts = 0) {
+  const dt = Math.min((ts - lastTime) / 16.67, 3); // normalize to ~60fps
+  lastTime = ts;
+
+  if (!gameRunning) return;
+
+  const c = CARS[selectedCar];
+
+  // Time
+  survivalTime = (performance.now() - gameStartTime) / 1000;
+  document.getElementById('survival-num').textContent = survivalTime.toFixed(1);
+  document.getElementById('speed-num').textContent = Math.round(speed);
+
+  // Acceleration / brake
+  if (keys.gas) {
+    speed = Math.min(speed + c.accel * dt, c.maxSpeed);
+  } else if (keys.brake) {
+    speed = Math.max(speed - c.accel * 1.5 * dt, 0);
+  } else {
+    // coast
+    speed = Math.max(speed - 0.08 * dt, 0);
+  }
+
+  // Auto-increase speed slightly
+  if (speed < 60) speed += 0.4 * dt;
+
+  // Smoke on gas
+  if (keys.gas && Math.random() < 0.3) spawnSmoke(carX, carY + 18);
+  if (slipActive && Math.random() < 0.5) spawnSmoke(carX, carY + 18, 2);
+
+  // Drift physics — car drifts right over time
+  const driftForce = c.driftRate * speed * 0.1;
+
+  // Random slip events
+  slipTimer -= dt;
+  if (slipTimer <= 0 && !slipActive) {
+    slipTimer = Math.random() * 180 + 60;
+    slipActive = Math.random() < 0.6;
+  }
+  if (slipActive && slipTimer <= 0) {
+    slipActive = false;
+    slipTimer = Math.random() * 120 + 40;
+  }
+
+  let drift = driftForce;
+  if (slipActive) drift *= 3;
+
+  // Steering input
+  const steerForce = (speed * 0.025) * dt;
+  if (keys.left) carVX -= steerForce;
+  if (keys.right) carVX += steerForce;
+
+  // Apply natural rightward drift
+  carVX += drift * dt;
+
+  // Dampen lateral velocity (grip)
+  const gripDamp = slipActive ? 0.96 : 0.90;
+  carVX *= gripDamp;
+
+  // Move road instead of car forward
+  roadOffset += speed * 0.4 * dt;
+
+  // Apply lateral movement
+  carX += carVX * dt;
+
+  // Visual angle from drift
+  driftAngle = Math.atan2(carVX, Math.max(speed * 0.1, 1)) * 0.6;
+  driftAngle = Math.max(-0.5, Math.min(0.5, driftAngle));
+
+  // Update particles
+  updateParticles();
+
+  // ── DRAW ─────────────────────────────────────────
+  ctx.clearRect(0, 0, CW, CH);
+  drawRoad(roadOffset);
+  drawParticles();
+  drawCar(carX, carY, driftAngle, c);
+
+  // Speed tint overlay at high speed
+  if (speed > 150) {
+    const intensity = Math.min((speed - 150) / 100, 1) * 0.15;
+    ctx.fillStyle = `rgba(255, 0, 0, ${intensity})`;
+    ctx.fillRect(0, 0, CW, CH);
+  }
+
+  // ── CRASH DETECTION ──────────────────────────────
+  const rl = ROAD_CX - ROAD_WIDTH / 2 - 30;
+  const rr = ROAD_CX + ROAD_WIDTH / 2 + 30;
+  if (carX < rl || carX > rr) {
+    triggerCrash();
+    return;
+  }
+
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+// ─── CRASH ─────────────────────────────────────────────────────────────────
+function triggerCrash() {
+  gameRunning = false;
+  crashed = true;
+  spawnCrash(carX, carY);
+
+  // Draw final frame with crash particles
+  setTimeout(() => {
+    ctx.clearRect(0, 0, CW, CH);
+    drawRoad(roadOffset);
+    drawParticles();
+    // Draw tilted wrecked car
+    const c = CARS[selectedCar];
+    drawCar(carX, carY, carX < CW / 2 ? -0.8 : 0.8, c);
+  }, 50);
+
+  const score = Math.round(survivalTime * speed);
+  const towCost = Math.round(speed * 12 + survivalTime * 8);
+
+  saveTow(towCost);
+
+  const msg = PRANG_MSGS[Math.floor(Math.random() * PRANG_MSGS.length)];
+
+  document.getElementById('prang-msg').textContent = msg;
+  document.getElementById('prang-score').textContent =
+    `PRANG SCORE: ${score.toLocaleString()} PTS`;
+  document.getElementById('prang-tow').textContent =
+    `TOW BILL: $${towCost.toLocaleString()} (TOTAL TOW DEBT: $${towBucks.toLocaleString()})`;
+  document.getElementById('prang-overlay').classList.add('show');
+}
+
+// ─── RESET ─────────────────────────────────────────────────────────────────
+function resetGame() {
+  document.getElementById('prang-overlay').classList.remove('show');
+  document.getElementById('launchBtn').disabled = false;
+  document.getElementById('controls').classList.remove('active');
+  gameRunning = false;
+  Object.keys(keys).forEach(k => keys[k] = false);
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('pressed'));
+  document.getElementById('survival-num').textContent = '0.0';
+  document.getElementById('speed-num').textContent = '0';
+  drawIdle();
+}
+
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────
+const keyMap = {
+  'ArrowLeft': 'left', 'a': 'left', 'A': 'left',
+  'ArrowRight': 'right', 'd': 'right', 'D': 'right',
+  'ArrowUp': 'gas', 'w': 'gas', 'W': 'gas',
+  'ArrowDown': 'brake', 's': 'brake', 'S': 'brake',
+  ' ': 'gas', 'Enter': 'gas'
+};
+
+document.addEventListener('keydown', e => {
+  const k = keyMap[e.key];
+  if (k) { keys[k] = true; e.preventDefault(); }
+  if (e.key === 'Enter' && !gameRunning && selectedCar) launchGame();
+});
+
+document.addEventListener('keyup', e => {
+  const k = keyMap[e.key];
+  if (k) keys[k] = false;
+});
+
+// ─── TOUCH / CLICK CONTROLS ────────────────────────────────────────────────
+function setupCtrlBtn(id, keyName) {
+  const btn = document.getElementById(id);
+  const setPressed = (v) => {
+    keys[keyName] = v;
+    btn.classList.toggle('pressed', v);
+  };
+  btn.addEventListener('mousedown', () => setPressed(true));
+  btn.addEventListener('mouseup', () => setPressed(false));
+  btn.addEventListener('mouseleave', () => setPressed(false));
+  btn.addEventListener('touchstart', e => { e.preventDefault(); setPressed(true); }, { passive: false });
+  btn.addEventListener('touchend', e => { e.preventDefault(); setPressed(false); }, { passive: false });
+  btn.addEventListener('touchcancel', e => { e.preventDefault(); setPressed(false); }, { passive: false });
+}
+
+setupCtrlBtn('btnLeft', 'left');
+setupCtrlBtn('btnRight', 'right');
+setupCtrlBtn('btnGas', 'gas');
+setupCtrlBtn('btnBrake', 'brake');
+</script>
+</body>
+</html>
